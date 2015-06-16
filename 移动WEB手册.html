@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>移动WEB手册</title>
+	<script>
+	function iframe(id){
+	    var iframe = document.createElement('iframe');
+	    iframe.src = 'data:text/html,<meta charset="gbk"><style>body{margin:0 0 0 0;}</style>'+document.getElementById(id).innerHTML;
+	    iframe.onload = function(){
+	        //iframe.contentWindow.document.documentElement.innerHTML = document.getElementById(id).innerHTML;
+	    }
+	    iframe.style.cssText = 'width:320px;height:480px;transition:width ease 1s,height ease 1s';
+	    
+	    var btn = document.createElement('button');
+	    btn.innerText = 'expand';
+	    btn.style.width = '320px';
+	    btn.style.display = 'block';
+	    btn.onclick = function(){
+	        if(iframe.style.width === '320px') {
+	            iframe.style.width = '640px';
+	            //iframe.style.height = '1136px';
+	        } else {
+	            iframe.style.width = '320px';
+	            //iframe.style.height = '480px';
+	        }
+	    };
+	    document.body.appendChild(btn);
+	    document.body.appendChild(iframe);
+	    document.body.appendChild(document.createElement('br'));
+	}
+	function show(id) {
+	    var pre = document.createElement('pre');
+	    pre.innerText = document.getElementById(id).innerHTML;
+	    document.body.appendChild(pre);
+	}
+	</script>
+</head>
+<body>
+<h1>一、浏览器差异</h1>
+<p><a href="http://quirksmode.org/mobilewebhandbook/">浏览器差异</a></p>
+
+ 
+<h1>iOS浏览器的情况</h1>
+
+<p>
+对IOS上的chrome进行测试是相对无用的。虽然chrome应用整合了谷歌账号，但当它实际渲染网页时，必须使用苹果的WebView。因此，尽管你愿意测试iOS上的Chrome，但是根本反映不了安卓上的Chrome的真实情况，因为压根就是两种完全不同的浏览器。</p>
+
+<h1>二、理想视口</h1>
+
+<p>三星Galaxy Pocket 安卓Webkit理想视口：320px*427px</p>
+<p>Opera Mobile 12：240px*320px</p>
+<p>三星Galaxy S4上的Chrome：360px*640px</p>
+<p>Nexus 7：601px*962px</p>
+
+<h1>三、设备像素比</h1>
+ 
+<p>JavaScript有一个属性window.devicePixelRatio，CSS也有device-pixel-ratio（基于WebKit的浏览器）和分辨率（所有浏览器都支持）的媒体查询，但是它们都跟物理分辨率无关。取而代之的是，它们为你提供了设备像素个数和理想视口的比，称为设备像素比（Device Pixel Ratio，简称DPR）。</p>
+
+<p>早期iPhone的设备宽度是320个物理像素，它们的理想视口的宽度也是320个像素。因此，它们的设备像素比（DPR）是1.后来iPhone的宽度变成了640个设备像素，而它们的理想视口宽度仍为320个像素，因此设备像素比变成了2。</p>
+
+<p>DPR不一定要是一个整数。三星Galaxy Pocket的理想视口与iPhone的宽度一样是320px。但是，这个设备的宽度只有240个设备像素，因此它的DPR是0.75。BlackBerry Z10的宽度是768个设备像素，它的理想视口的宽度是342px，因此字的DPI大约为2.25。</p>
+
+<p>就像理想视口一样，虽说当你第一次看到这些值的时候会感到奇怪，但它们的值是没有正确错误之分的。浏览器厂商决定了设备上的理想视口，因此DPR也邮他们决定。</p>
+
+<h1>四、dppx和dpi</h1>
+
+<p>JavaScript中的window.devicePixelRatio和媒体查询的device-pixel-ratio的单位都是dppx：每一个像素的点数。但实际上是不允许在后面添加单位的，所以以下才是正确的语法。</p>
+
+<script type="text/html" id="s1">
+if(window.devicePixelRatio >= 2){
+    //DPR大于等于2时执行
+}
+
+@media all and(-webkit-min-device-pixel-ratio: 2){
+	//DPR大于等于2时生效
+}
+</script>
+<script>show('s1');</script>
+
+<p>然而，分辨率的媒体查询是需要单位的，但问题是虽然大多数浏览器都支持dppx，但IE11和以下的版本不支持。因此我们必须使用dpi单位来代替。因为一英寸对应了CSS中的96个像素，所以1dppx等于96dpi。为了使媒体查询支持所有浏览器，我们必须像下面这样做：</p>
+
+<script type="text/html" id="s2">
+@media all and ((-webkit-min-device-pixel-ratio: 2),(min-resolution: 192dpi)){
+     //DPR大于等于2时生效
+}
+</script>
+<script>show('s2');</script>
+
+
+<p>不要误认为物理尺寸与dpi是相关的，但你可以直接使用。</p>
+
+
+<h1>五、meta视口</h1>
+
+<p>1.width：设置布局视口的宽度为特定的值。</p>
+<p>2.init-scale：设置页面的初始缩放程度和布局视口的高度。</p>
+<p>3.minimum-scale：设置了最小缩放程度（用户可缩小的程度）。</p>
+<p>4.maximum-scale：设置了最大缩放程序（用户可放大的程度）。</p>
+<p>5.user-scalable：是否阻止用户进行缩放。（不建议使用）</p>
+
+<script type="text/html" id="s3">
+<meta name="viewport" content="width=device-width">  
+</script>
+<script>show('s3');</script>
+<p>布局的宽等于视口的宽，这样设置对于95%的网站都是合适的。</p>
+
+<script type="text/html" id="s4">
+<meta name="viewport" content="width=400">  
+</script>
+<script>show('s4');</script>
+<p>布局视口在所有情况下宽度都是400px。</p>
+
+<p>浏览器支持的最大值是10000个像素，最小值约为理想视口的20%。安卓Webkit不允许任何小于布局视口的宽度。如果指定了一个这样的值，它会自动转换为默认布局视口，通常是980px。IE10不允许任何超出480px的值，超出的话会自动转换为布局视口的默认宽度1024px。</p>
+
+<h1>六、initial-scale</h1>
+
+<p>initial-scale指令设置了页面的初始缩放程度。1代表100%，2代表200%，依此类推。缩放程度是根据理想视口来计算的。</p>
+
+<p>记住：缩放程度与视觉视口的宽度是逆相关的。在BlackBerry Z10上，如果理想视口的宽度是342px，initial-scale=1和initial-scale=2时视觉视口的尺寸分别是342px和171px。</p>
+
+<p>使用initial-scale有一个副作用：它同时也会将布局视口的尺寸设置为缩放后的尺寸。这个意思是，在BlackBerry Z10上设置initial-scale=1时，会使布局视口的尺寸为345*5701px，就像设置width=device-width一样。但当设置initial-scale=2时，会将布局视口的尺寸缩小到171*285px。</p>
+
+<p>结果是，initial-scale与width=device-width的效果是一样的，没有任何意义。</p>
+
+<h1>七、完美的meta视口</h1>
+
+<p>一个意外的惊喜发生在Safari上，当设置initial-scale=1时，理想视口的尺寸会随着屏莫的旋转改变。在竖屏模式下，布局视口的宽度是320px，在横屏模式下根据iPhone模型是480px或568px。</p>
+
+<p>IE10有着完全相反的问题：initial-scale为1时它在横屏模式下宽度也保持320px，但width=divece-width时它会从320px变为480px。为了在所有浏览器上解决这个问题，我们需要使用以下方法：</p>
+
+<script type="text/html" id="s5">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</script>
+<script>show('s5');</script>
+
+
+<p>现在Safari和IE的问题都解决了，布局视口在设备旋转的时候做出响应了。</p>
+
+
+<h1>八、媒体查询</h1>
+
+<p>语法笔记</p>
+<script type="text/html" id="s6">
+@media all and (max-width: 400){
+    div.sidebar{
+        //     这些给div.sidebar定义的样式在宽度小于或等于400px时才生效
+    }
+}
+
+@media all and (max-width: 400) and (orientation: portrait) and ((max-resolution: 144dpi),(-webkit-max-device-pixel-ratio: 1.5)){
+    //     只有布局视口不超过400px、设备处于竖屏模式，并且devicePixelRatio小于等于1.5时才会生效
+}
+
+</script>
+<script>show('s6');</script>
+
+
+
+
+</body>
+</html>
